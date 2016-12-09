@@ -15,8 +15,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void addContact(View view){
 
-        //TODO: Den emfanizetai to toast. Na diorthothei. Epeita na mpei kodikas insert sti vasi dedomenon
-        Toast.makeText(this,"Yes",Toast.LENGTH_SHORT);
+        Toast.makeText(this,"Yes",Toast.LENGTH_SHORT).show();
     }
 
 }
