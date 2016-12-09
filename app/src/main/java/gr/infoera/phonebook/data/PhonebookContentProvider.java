@@ -3,6 +3,7 @@ package gr.infoera.phonebook.data;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 
@@ -14,7 +15,6 @@ import gr.infoera.phonebook.PhonebookDbHelper;
  */
 
 public class PhonebookContentProvider extends ContentProvider {
-    //TODO: na dimiourgithei i methodos delete. Meta na ginei testing
     private static final UriMatcher sUriMatcher=buildUriMatcher();
     private static final int CONTACTS=100;
 
@@ -84,4 +84,49 @@ public class PhonebookContentProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri,null);
         return returnUri;
     }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs){
+        final SQLiteDatabase db=phonebookDbHelper.getWritableDatabase();
+        final int match=sUriMatcher.match(uri);
+        int rowsDeleted;
+
+        if (null==selection) selection="1";
+
+        switch (match){
+            case CONTACTS:
+                rowsDeleted=db.delete(
+                        PhoneBookContract.Contacts.TABLE_NAME,selection,selectionArgs
+                );
+                break;
+            default:
+                throw new UnsupportedOperationException("Uknown URI "+uri);
+        }
+        if (rowsDeleted!=0){
+            getContext().getContentResolver().notifyChange(uri,null);
+        }
+        return rowsDeleted;
+    }
+
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+                        String sortOrder){
+        Cursor retCursor;
+        final int match=sUriMatcher.match(uri);
+        switch (match){
+            case CONTACTS:
+                retCursor=phonebookDbHelper.getReadableDatabase().query(
+                    PhoneBookContract.Contacts.TABLE_NAME,
+                        projection,selection,selectionArgs,null,null,sortOrder
+                );
+                break;
+            default:
+                throw new UnsupportedOperationException("Uri not found "+uri);
+        }
+        retCursor.setNotificationUri(getContext().getContentResolver(),uri);
+        return retCursor;
+
+
+    }
+
 }
